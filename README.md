@@ -28,7 +28,7 @@ implementation and is quite handy to use standalone.
 
 ## DOWNLOADING
 
-    git clone https://github.com/popcornmix/omxplayer.git
+    git clone https://github.com/NXT-Hitesh/omxplayer.git
 
 ## HELP AND DOCS
 
