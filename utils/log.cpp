@@ -57,7 +57,7 @@ void CLog::Log(int loglevel, const char *format, ... )
 {
   pthread_mutex_lock(&m_log_mutex);
 
-  static const char* prefixFormat = "%02.2d:%02.2d:%02.2d T:%" PRIu64 " %7s: ";
+  static const char* prefixFormat = "%s: %3s: ";
 #if !(defined(_DEBUG) || defined(PROFILE))
   if (m_logLevel > LOG_LEVEL_NORMAL ||
      (m_logLevel > LOG_LEVEL_NONE && loglevel >= LOGNOTICE))
@@ -71,11 +71,15 @@ void CLog::Log(int loglevel, const char *format, ... )
 
     struct timeval now;
     gettimeofday(&now, NULL);
-    SYSTEMTIME time;
-    time.wHour=(now.tv_sec/3600) % 24;
-    time.wMinute=(now.tv_sec/60) % 60;
-    time.wSecond=now.tv_sec % 60;
-    uint64_t stamp = now.tv_usec + now.tv_sec * 1000000;
+
+    char timestampBuffer[80];
+    time_t rawtime;
+    struct tm *info;
+
+    time( &rawtime );
+    info = localtime( &rawtime );
+    strftime(timestampBuffer,80,"%F %T %Z", info);
+
     CStdString strPrefix, strData;
 
     strData.reserve(16384);
@@ -93,7 +97,7 @@ void CLog::Log(int loglevel, const char *format, ... )
     else if (m_repeatCount)
     {
       CStdString strData2;
-      strPrefix.Format(prefixFormat, time.wHour, time.wMinute, time.wSecond, stamp, levelNames[m_repeatLogLevel]);
+      strPrefix.Format(prefixFormat, timestampBuffer, levelNames[m_repeatLogLevel]);
 
       strData2.Format("Previous line repeats %d times." LINE_ENDING, m_repeatCount);
       fputs(strPrefix.c_str(), m_file);
@@ -126,7 +130,7 @@ void CLog::Log(int loglevel, const char *format, ... )
     strData.Replace("\n", LINE_ENDING"                                            ");
     strData += LINE_ENDING;
 
-    strPrefix.Format(prefixFormat, time.wHour, time.wMinute, time.wSecond, stamp, levelNames[loglevel]);
+    strPrefix.Format(prefixFormat, timestampBuffer, levelNames[loglevel]);
 
     fputs(strPrefix.c_str(), m_file);
     fputs(strData.c_str(), m_file);
@@ -146,8 +150,8 @@ bool CLog::Init(const char* path)
   {
     CStdString strLogFile, strLogFileOld;
 
-    strLogFile.Format("%s/omxplayer.log", path);
-    strLogFileOld.Format("%s/omxplayer.old.log", path);
+    strLogFile.Format("%s", path);
+    strLogFileOld.Format("%s.old", path);
 
     struct stat info;
     if (stat(strLogFileOld.c_str(),&info) == 0 &&

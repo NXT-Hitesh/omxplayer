@@ -530,6 +530,7 @@ int main(int argc, char *argv[])
   std::string            m_lavfdopts           = "";
   std::string            m_avdict              = "";
 
+  std::string            m_logpath              = "./";
   const int font_opt        = 0x100;
   const int italic_font_opt = 0x201;
   const int font_size_opt   = 0x101;
@@ -594,7 +595,7 @@ int main(int argc, char *argv[])
     { "hdmiclocksync", no_argument,       NULL,          'y' },
     { "nohdmiclocksync", no_argument,     NULL,          'z' },
     { "refresh",      no_argument,        NULL,          'r' },
-    { "genlog",       no_argument,        NULL,          'g' },
+    { "genlog",       required_argument,  NULL,          'g' },
     { "sid",          required_argument,  NULL,          't' },
     { "pos",          required_argument,  NULL,          'l' },    
     { "blank",        optional_argument,  NULL,          'b' },
@@ -647,7 +648,7 @@ int main(int argc, char *argv[])
   //Build default keymap just in case the --key-config option isn't used
   map<int,int> keymap = KeyConfig::buildDefaultKeymap();
 
-  while ((c = getopt_long(argc, argv, "wiIhvkn:l:o:cslb::pd3:Myzt:rg", longopts, NULL)) != -1)
+  while ((c = getopt_long(argc, argv, "wiIhvkn:l:o:cslb::pd3:Myzt:rg:", longopts, NULL)) != -1)
   {
     switch (c) 
     {
@@ -656,6 +657,7 @@ int main(int argc, char *argv[])
         break;
       case 'g':
         m_gen_log = true;
+	m_logpath = optarg;
         break;
       case 'y':
         m_config_video.hdmi_clock_sync = true;
@@ -992,7 +994,7 @@ int main(int argc, char *argv[])
   }
   if(m_gen_log) {
     CLog::SetLogLevel(LOG_LEVEL_DEBUG);
-    CLog::Init("./");
+    CLog::Init(m_logpath.c_str());
   } else {
     CLog::SetLogLevel(LOG_LEVEL_NONE);
   }
