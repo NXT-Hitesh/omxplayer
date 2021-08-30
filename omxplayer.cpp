@@ -648,6 +648,7 @@ int main(int argc, char *argv[])
   //Build default keymap just in case the --key-config option isn't used
   map<int,int> keymap = KeyConfig::buildDefaultKeymap();
 
+  m_config_video.deinterlace = VS_DEINTERLACEMODE_OFF;
   while ((c = getopt_long(argc, argv, "wiIhvkn:l:o:cslb::pd3:Myzt:rg:", longopts, NULL)) != -1)
   {
     switch (c) 
@@ -999,6 +1000,7 @@ int main(int argc, char *argv[])
     CLog::SetLogLevel(LOG_LEVEL_NONE);
   }
 
+url_reset:
   g_RBP.Initialize();
   g_OMX.Initialize();
 
@@ -1831,6 +1833,8 @@ int main(int argc, char *argv[])
   }
 
 do_exit:
+
+
   if (m_stats)
     printf("\n");
 
@@ -1877,6 +1881,13 @@ do_exit:
 
   g_OMX.Deinitialize();
   g_RBP.Deinitialize();
+
+  if (!g_abort) {
+	printf("Reset player as input stream lost..\n");
+	if ( filename_is_URL ) {
+		goto url_reset;
+	}
+  }
 
   printf("have a nice day ;)\n");
 
